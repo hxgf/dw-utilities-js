@@ -1,0 +1,24 @@
+{
+  "name": "dw-utilities",
+  "version": "0.6.0",
+  "description": "A collection of utility functions to facilitate an efficient workflow with the Darkwave web application toolkit.",
+  "main": "dist/dw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hxgf/dw-utilities-js.git"
+  },
+  "keywords": [
+    "utilities",
+    "abstraction",
+    "functions"
+  ],
+  "author": "hex girlfriend <static@hexgirlfriend.com> (http://hexgirlfriend.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hxgf/dw-utilities-js/issues"
+  },
+  "homepage": "https://github.com/hxgf/dw-utilities-js#readme"
+}
