@@ -9,7 +9,7 @@ These functions are included with Darkwave, but they can be installed and used a
 
 
 ```
-https://cdn.jsdelivr.net/npm/dw-utilities@0.6/dist/dw.min.js
+<script src="https://cdn.jsdelivr.net/npm/dw-utilities@0.6/dist/dw.min.js"></script>
 ```
 
 
