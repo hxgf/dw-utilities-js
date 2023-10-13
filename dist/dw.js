@@ -1,6 +1,6 @@
 /*!
 * DW Utilities (JS)
-* @version 0.7.0
+* @version 0.7.1
 * @link https://darkwave.ltd
 * Copyright 2016-2023 HXGF (Jonathan Youngblood)
 * Licensed under MIT (https://github.com/hxgf/dw-utilities-js/blob/master/LICENSE.md)
@@ -81,9 +81,15 @@ var dw = {
     for (var i = 0; i < required_items.length; i++) {
       var input = required_items[i];
       if (!input.value) {
-        input.classList.add('is-invalid')
+        input.classList.add('is-invalid');
         input.nextElementSibling.innerHTML = 'Required';
         valid = false;
+      }else{
+        if (input.classList.contains('is-invalid')){
+          input.classList.remove('is-invalid');
+          input.nextElementSibling.innerHTML = 'Required';
+          valid = true;
+        }
       }
     }
     if (!valid) {
