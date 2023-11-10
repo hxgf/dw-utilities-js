@@ -1,6 +1,6 @@
 /*!
 * DW Utilities (JS)
-* @version 0.7.1
+* @version 0.7.2
 * @link https://darkwave.ltd
 * Copyright 2016-2023 HXGF (Jonathan Youngblood)
 * Licensed under MIT (https://github.com/hxgf/dw-utilities-js/blob/master/LICENSE.md)
@@ -76,15 +76,35 @@ var dw = {
     return serialized.join('&');
   },
   form_validate: function (callback) {
-    var required_items = document.querySelectorAll('.required input, .required textarea, .required select');
     var valid = true;
+    // validation for fields using the dw validator (validate_input())
+    var validate_items = document.querySelectorAll('[data-validate]');
+    for (var i = 0; i < validate_items.length; i++) {
+      var vcontainer = validate_items[i];
+      var input = vcontainer.querySelector('input');
+      var validator_cfg = input.getAttribute('x-on:blur');
+      if (input.classList.contains('is-invalid')){
+        valid = false;
+      }else{
+        if (validator_cfg){
+          if (validator_cfg.includes('required:')) {
+            if (!input.value) {
+              dw.display_error(vcontainer.getAttribute('data-validate'), 'Required');
+              valid = false;
+            }
+          }
+        }
+      }
+    }
+    // legacy style checker for required fields only - only for checking fields that DONT use the dw validator
+    var required_items = document.querySelectorAll('.required input, .required textarea, .required select');
     for (var i = 0; i < required_items.length; i++) {
       var input = required_items[i];
       if (!input.value) {
         input.classList.add('is-invalid');
         input.nextElementSibling.innerHTML = 'Required';
         valid = false;
-      }else{
+      } else {
         if (input.classList.contains('is-invalid')){
           input.classList.remove('is-invalid');
           input.nextElementSibling.innerHTML = 'Required';
@@ -93,13 +113,8 @@ var dw = {
       }
     }
     if (!valid) {
-      var error_title = 'Incomplete Data';
-      var error_description = 'Please add missing information to<br /> any <span class="text-danger">required</span> fields and try again.';
-    }
-    if (document.querySelectorAll('.is-invalid').length > 0) {
-      valid = false;
-      error_title = 'Invalid Data';
-      error_description = 'Please correct any<br /> <span class="text-danger">error</span> fields and try again.';
+      var error_title = 'Errors Detected';
+      var error_description = 'Please correct any<br /> <span class="text-danger">error</span> fields and try again.';
     }
     if (valid) {
       callback();
@@ -225,40 +240,77 @@ var dw = {
   },
   validate_input: function (cfg) {
     dw.prevent_submit = true;
-    if (cfg.unique) {
-      var request_data = {
-        collection: cfg.unique.collection,
-        field: cfg.unique.field,
-        value: cfg.element.value,
-      };
-      if (cfg.unique.exempt_id) {
-        request_data.exempt_id = cfg.unique.exempt_id;
+
+    var valid = true;
+
+    if (cfg.required) {
+      if (!cfg.element.value) {
+        dw.display_error(cfg.input, cfg.error_message ? cfg.error_message : 'Required');
+        dw.prevent_submit = false;
+        valid = false;
+      } else {
+        dw.remove_error(cfg.input);
+        dw.prevent_submit = false;
       }
-      dw.api_request({
-        url: '/dw/utility/validate-unique/',
-        data: request_data,
-        callback: function (r) {
-          if (r.error) {
-            dw.display_error(cfg.input, cfg.unique.error_message ? cfg.unique.error_message : 'Value must be unique');
-            dw.prevent_submit = false;
-          } else {
-            dw.remove_error(cfg.input);
-            dw.prevent_submit = false;
-          }
-        }
-      });
-    } else {
-      if (cfg.required) {
-        if (!cfg.element.value) {
-          dw.display_error(cfg.input, 'Required');
-          // cfg.element.focus();
-          dw.prevent_submit = false;
-        } else {
+    }
+
+    if (cfg.is_email && valid){
+      if (cfg.element.value){
+        if (/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(cfg.element.value)) {
           dw.remove_error(cfg.input);
           dw.prevent_submit = false;
+        } else {
+          dw.display_error(cfg.input, cfg.error_message ? cfg.error_message : 'Must be an email address');
+          dw.prevent_submit = false;
+          valid = false;
         }
       }
     }
+
+    if (cfg.regex && valid) {
+      if (cfg.element.value) {
+        if (cfg.regex.test(cfg.element.value)) {
+          dw.remove_error(cfg.input);
+          dw.prevent_submit = false;
+        } else {
+          dw.display_error(cfg.input, cfg.error_message ? cfg.error_message : 'Error');
+          dw.prevent_submit = false;
+          valid = false;
+        }
+      }
+    }
+
+    if (cfg.unique && valid) {
+      if (cfg.element.value){
+        var request_data = {
+          collection: cfg.unique.collection,
+          field: cfg.unique.field,
+          value: cfg.element.value,
+        };
+        if (cfg.unique.exempt_id) {
+          request_data.exempt_id = cfg.unique.exempt_id;
+        }
+        dw.api_request({
+          url: '/dw/utility/validate-unique/',
+          data: request_data,
+          callback: function (r) {
+            if (r.error) {
+              dw.display_error(cfg.input, cfg.unique.error_message ? cfg.unique.error_message : 'Value must be unique');
+              dw.prevent_submit = false;
+              valid = false;
+            } else {
+              dw.remove_error(cfg.input);
+              dw.prevent_submit = false;
+            }
+          }
+        });
+      }
+    }
+
+    if (cfg.force_focus && !valid){
+      cfg.element.focus();
+    }
+
   },
   remove_error: function (data_name) {
     document.querySelector('[data-validate="' + data_name + '"] .form-control').classList.remove('is-invalid');

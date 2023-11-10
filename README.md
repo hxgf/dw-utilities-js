@@ -9,7 +9,7 @@ These functions are included with Darkwave, but they can be installed and used a
 
 
 ```
-<script src="https://cdn.jsdelivr.net/npm/dw-utilities@0.7.1/dist/dw.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dw-utilities@0.7.2/dist/dw.min.js"></script>
 ```
 
 
@@ -231,22 +231,40 @@ dw.modal_destroy('custom-modal-id');
 
 
 ## dw.validate_input(cfg)
-Validates a given input for uniqueness or required value. `Unique` validation calls an API route that can check a given collection and  field. This method is intended to be called on input blur. Here's an example using an Apline.js `x-on:blur` event:
+Validates a given input for uniqueness or required value. The `unique` validation parameter defines a call to an API route that can check a given collection and  field. This method is intended to be called on input blur. Here's an example using an Apline.js `x-on:blur` event:
 ```html
-<input type="email" name="email" x-on:blur="dw.validate_input({
-  input: 'email',
-  element: $event.target,
-  required: true,
-  unique: {
-    collection: 'users',
-    field: 'email',
-    error_message: 'This email is already registered',
-    exempt_id: '{{locals.user_id}}'
-  }
-})" />
+<div class="mb-4 form-group" data-validate="email">
+  <label class="form-label">Email</label>
+  <input type="email" name="email" x-on:blur="dw.validate_input({
+    input: 'email',
+    element: $event.target,
+    required: true,
+    unique: {
+      collection: 'users',
+      field: 'email',
+      error_message: 'This email is already registered',
+      exempt_id: '{{locals.user_id}}'
+    }
+  })" />
+  <div class="invalid-feedback"></div>
+</div>
 ```
 
-
+Additional parameters can be included: `is_email` checks for `x@x.x` format, `error_message` defines a custom error message, `force_focus` will refocus this input on blur, and `regex` defines a custom regex to compare with the field input:
+```html
+<div class="mb-4 form-group" data-validate="name">
+  <label class="form-label">Name</label>
+  <input type="text" name="name" x-on:blur="dw.validate_input({
+    input: 'name',
+    element: $event.target,
+    is_email: true,
+    error_message: 'Must be an email address',
+    force_focus: true,
+    regex: /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+  })" />
+  <div class="invalid-feedback"></div>
+</div>
+```
 
 
 
