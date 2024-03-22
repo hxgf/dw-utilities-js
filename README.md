@@ -1,6 +1,6 @@
 # DW Utilities (JS)
 
-### A collection of utility functions to facilitate an efficient workflow with the [Darkwave](https://github.com/hxgf/darkwave) web application toolkit.
+### A collection of utility functions to facilitate an efficient workflow with the [Darkwave](https://github.com/jyoungblood/darkwave) web application toolkit.
 
 
 
